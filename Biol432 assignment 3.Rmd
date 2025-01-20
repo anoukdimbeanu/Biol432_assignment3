@@ -1,0 +1,284 @@
+---
+title: "Biol432assignment3"
+author: "Anouk Dimbeanu"
+date: "2025-01-20"
+output: html_document
+---
+
+```{r}
+library(MASS)
+library(caret)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(klaR)
+```
+
+## Load the dataset
+```{r}
+dat <- read.csv("/Users/anoukdimbeanu/Desktop/ColauttiBarrett2013Data.csv")
+```
+
+```{r}
+head(dat)
+```
+
+```{r}
+tail(dat)
+```
+
+```{r}
+str(dat)
+```
+
+```{r}
+summary(dat)
+```
+```{r}
+ggplot(dat, aes(x = dat$Flwr07)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$FVeg07)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$InfMass07)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$Fruits07)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$Flwr08)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$FVeg08)) +
+  geom_histogram(bins = 20)
+```
+
+
+```{r}
+ggplot(dat, aes(x = dat$HVeg08)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$InfMass08)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$Flwr09)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$FVeg09)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$HVeg09)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$InfMass09)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$Flwr10)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$FVeg10)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$HVeg10)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+ggplot(dat, aes(x = dat$InfMass10)) +
+  geom_histogram(bins = 20)
+```
+
+# Log transform InfMass07, Fruits07, InfMass08, InfMass09, InfMass10 and mutate into the dataset
+
+```{r}
+dat$InfMass07 <- log(dat$InfMass07)
+dat$Fruits07 <- log(dat$Fruits07)
+dat$InfMass08 <-log(dat$InfMass08)
+dat$InfMass09 <-log(dat$InfMass09)
+dat$InfMass10<-log(dat$InfMass10)
+```
+
+## Scale 
+```{r}
+Features <- dat %>% dplyr::select(-c(1:7))
+head(Features) 
+Response <- dat %>% dplyr :: select(1:7)
+``` 
+
+```{r}
+head(Response)
+```
+
+```{r}
+Scaled <- Features %>% mutate_all(scale)
+```
+
+Chose this method based on week 3 perusall. It is a shortened function instead of using a long pivot function to scale to the mean and standard deviation. 
+
+```{r}
+Scaled %>% select_if(function(x) any(is.na(x))) %>%
+  names()
+```
+
+
+## Replace missing data with 0
+```{r}
+ScalComp <- Scaled %>%
+  mutate(Flwr07 = ifelse(is.na(Flwr07),0,Flwr07),
+         FVeg07 = ifelse(is.na(FVeg07),0,FVeg07),
+         InfMass07 = ifelse(is.na(InfMass07),0,InfMass07),
+         Fruits07 = ifelse(is.na(Fruits07),0,Fruits07),
+         Flwr08 = ifelse(is.na(Flwr08),0,Flwr08),
+         FVeg08 = ifelse(is.na(FVeg08),0,FVeg08),
+         HVeg08 = ifelse(is.na(HVeg08),0,HVeg08),
+         InfMass08 = ifelse(is.na(InfMass08),0,InfMass08),
+         Flwr09 = ifelse(is.na(Flwr09),0,Flwr09),
+         FVeg09 = ifelse(is.na(FVeg09),0,FVeg09),
+         HVeg09 = ifelse(is.na(HVeg09),0,HVeg09),
+         InfMass09 = ifelse(is.na(InfMass09),0,InfMass09),
+         Flwr10 = ifelse(is.na(Flwr10),0,Flwr10),
+         FVeg10 = ifelse(is.na(FVeg10),0,FVeg10),
+         HVeg10 = ifelse(is.na(HVeg10),0,HVeg10),
+         InfMass10 = ifelse(is.na(InfMass10),0,InfMass10))
+```
+
+```{r}
+dim(ScalComp)
+```
+
+## Feature selection
+
+```{r}
+FeatureSel <- ScalComp %>% 
+  mutate(Location = dat$Site) %>%
+  pivot_longer(cols = -Location,
+               names_to = "GrowingSites", 
+               values_to = "GeneticPopulations") 
+head(FeatureSel)
+```
+
+```{r}
+Pvals <- FeatureSel %>%
+  group_by(GrowingSites) %>%
+  summarize(P = anova(lm(GeneticPopulations ~ Location))[1,"Pr(>F)"]) %>%
+  dplyr::select(GrowingSites,P)
+```
+
+```{r}
+head(Pvals)
+```
+
+```{r}
+unique(dat$Site)
+```
+
+```{r}
+Keep <-Pvals %>%
+  filter(Pvals$P < 0.05)
+Keep <-paste(Keep$GrowingSites)
+```
+
+
+# Part 2
+
+## LDA - For 1_BEF and 2_KSR, 2_KSR and 3_Timmins and 1_BEF and 3_Timmins
+
+```{r}
+ScaledSub <-ScalComp %>%
+  dplyr::select(all_of(Keep))
+names(ScaledSub)
+```
+
+### 1_BEF and 2_KSR
+
+```{r}
+RDAResp <-Response %>%
+  mutate(NewGroup1 = replace(Response$Site, Site!= "1_BEF", "2_KSR"))
+```
+
+```{r}
+LDAmodBK <- lda(x = ScaledSub, grouping = RDAResp$NewGroup1)
+str(LDAmodBK)
+```
+
+### 2_KSR and 3_Timmins
+
+```{r}
+RDAResp <-Response %>%
+  mutate(NewGroup2 = replace(Response$Site, Site!= "2_KSR", "3_Timmins"))
+```
+
+```{r}
+LDAmodKT <- lda(x = ScaledSub, grouping = RDAResp$NewGroup2)
+str(LDAmodKT)
+```
+
+### 1_BEF and 3_Timmins
+
+```{r}
+RDAResp <-Response %>%
+  mutate(NewGroup3 = replace(Response$Site, Site!= "1_BEF", "3_Timmins"))
+```
+
+```{r}
+LDAmodBT <- lda(x = ScaledSub, grouping = RDAResp$NewGroup3)
+str(LDAmodBT)
+```
+In order to do a proper analysis you need to distinguish 3 LD axes. 
+
+## LDA MOD scalings
+
+### 1_BEF and 2_KSR scaling
+
+```{r}
+LDAmodBK$scaling
+```
+
+### LDA 2_KSR and 3_Timmins scaling
+
+```{r}
+LDAmodKT$scaling
+```
+
+### LDA 1_BEF and 3_Timmins scaling
+
+```{r}
+LDAmodBT$scaling
+```
+
+
+
+
+The $Scaling shows the discriminant coefficientswhich shows how much the predictors (features) contribute to the discriminant function. 
+
+ 
+
+
+
