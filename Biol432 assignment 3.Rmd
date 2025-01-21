@@ -283,8 +283,16 @@ LDAmodBT$scaling
 The $Scaling shows the discriminant coefficients which shows how much the predictors (features) contribute to the discriminant function. 
 
  
-#Final Interpretation 
+## 5. Write some text to explain what you learned about the *Lythrum* data from your LDA models. Compare results to the PCA results and projection of loadings in the PCA Tutorial. Which traits distinguish genetic populations and regions best, respectively? Formulate biological hypotheses to explain the LDA results.
+
 The Linear Discriminant Analysis (LDA) highlights that reproductive traits, particularly Flwr08 and Flwr07, are the most consistent and significant contributors to distinguishing populations across all comparisons, emphasizing their role in reproductive success and potential genetic barriers. Vegetative traits, such as FVeg08, also play an important but secondary role, reflecting differences in growth strategies influenced by local adaptation and environmental factors. For 2_KSR vs 3_Timmins, Flwr10 and FVeg08 dominate, indicating a strong impact of both reproductive and vegetative traits in population differentiation, while contrasting growth patterns are evident through negative contributions of FVeg09 and FVeg10. Across all comparisons, the interplay of reproductive and vegetative traits underscores their significance in shaping population divergence, with local environmental factors likely driving these differences. Further cross-validation is recommended to confirm the reliability and accuracy of the models.
 
 
+## 6. Explain how you could use an RDA to try to improve the accuracy of the predictions relative to an LDA. Contrast the RDA with LDA and describe the major steps and R functions you would use. 
 
+The predictions could be improved by a reduction in the changes of overfitting and/or multicollinearity, which could be accomplished with an RDA. If we used an RDA, we would use the klaR package by running "library(klaR)" and "library(caret)". Then, we could use trainControl() followed by trainClass() to figure out what the values of the two tuning parameters (gamma and lambda) should be. In the LDA that we ran, it is assumed that lambda=1 and gamma=0, whereas with an RDA these values can be anywhere between 1 and 0.
+
+
+## 7. Explain how you could assess the accuracy of a model if the data were heavily imbalanced (e.g., 90% of observations were from a single *Lythrum* population).
+
+If the data were heavily imbalanced, we could use Cohen's Kappa to account for this. By running "library(caret)", then running confusion(Matrix) and extracting the Kappa value. Alternatively, we could use train() for the LDA and find kappa values from there. If we find the kappa value, we will know how accurate the model is, with values ranging between -1 and 1 -- values closer to 0 will indicate that the accuracy is on par with results happening by chance, while 1 would indicate complete accuracy.
