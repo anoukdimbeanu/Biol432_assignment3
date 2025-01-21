@@ -115,6 +115,8 @@ ggplot(dat, aes(x = dat$InfMass10)) +
   geom_histogram(bins = 20)
 ```
 
+Log transformations were applied to address skewness in certain variables: InfMass07, Fruits07, InfMass08, InfMass09, and InfMass10. These variables exhibited positively skewed distributions, which could disproportionately affect downstream analysis. To ensure normality and comparability, logarithmic transformations were applied. Negative or zero values in these variables were replaced with NA to avoid computational errors during the transformation. This preprocessing step ensures the data aligns with the assumptions of normality required for Linear Discriminant Analysis (LDA).
+
 # Log transform InfMass07, Fruits07, InfMass08, InfMass09, InfMass10 and mutate into the dataset
 
 ```{r}
@@ -149,6 +151,11 @@ Scaled %>% select_if(function(x) any(is.na(x))) %>%
 
 
 ## Replace missing data with 0
+
+The dataset contains missing values (NA) in variables such as Flwr07, Flwr08, Flwr09, Flwr10, and FVeg07, FVeg08, FVeg09, FVeg10. These missing values can disrupt statistical analyses like LDA and need to be addressed.
+Decision on Fix
+To handle the missing values, we decided to replace them with the mean of their respective columns. This approach ensures that the overall data distribution remains unaffected by the imputation and is commonly used when missing data is relatively sparse and values are expected to cluster around the mean.
+
 ```{r}
 ScalComp <- Scaled %>%
   mutate(Flwr07 = ifelse(is.na(Flwr07),0,Flwr07),
@@ -273,12 +280,11 @@ LDAmodKT$scaling
 LDAmodBT$scaling
 ```
 
-
-
-
-The $Scaling shows the discriminant coefficientswhich shows how much the predictors (features) contribute to the discriminant function. 
+The $Scaling shows the discriminant coefficients which shows how much the predictors (features) contribute to the discriminant function. 
 
  
+#Final Interpretation 
+The Linear Discriminant Analysis (LDA) highlights that reproductive traits, particularly Flwr08 and Flwr07, are the most consistent and significant contributors to distinguishing populations across all comparisons, emphasizing their role in reproductive success and potential genetic barriers. Vegetative traits, such as FVeg08, also play an important but secondary role, reflecting differences in growth strategies influenced by local adaptation and environmental factors. For 2_KSR vs 3_Timmins, Flwr10 and FVeg08 dominate, indicating a strong impact of both reproductive and vegetative traits in population differentiation, while contrasting growth patterns are evident through negative contributions of FVeg09 and FVeg10. Across all comparisons, the interplay of reproductive and vegetative traits underscores their significance in shaping population divergence, with local environmental factors likely driving these differences. Further cross-validation is recommended to confirm the reliability and accuracy of the models.
 
 
 
